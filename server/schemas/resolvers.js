@@ -10,8 +10,17 @@ const resolvers = {
         },
     },
     Mutation: {
-        login: async (parent, args) => {
-            return;
+        login: async (parent, { body }) => {
+            const user = await User.findOne({ $or: [{ username: body.username }, { email: body.email }] });
+            if (!user) {
+                return { message: "Can't find this user" };
+            }
+            const correctPw = await user.isCorrectPassword(body.password)
+            if (!correctPw) {
+                return { message: 'Wrong password!' };
+            }
+            const token = signToken(user);
+            return { token, user };
         },
         addUser: async (parent, args) => {
             const user = await User.create(args);
