@@ -11,6 +11,7 @@ import {
 import Auth from '../utils/auth';
 import { searchGoogleBooks } from '../utils/API';
 import { saveBookIds, getSavedBookIds } from '../utils/localStorage';
+import { SAVE_BOOK } from '../utils/mutations';
 const [saveBook, { error }] = useMutation(SAVE_BOOK);
 
 const SearchBooks = () => {
@@ -73,7 +74,9 @@ const SearchBooks = () => {
     }
 
     try {
-      const { data } = await saveBook(bookToSave, token);
+      await saveBook({
+        variables: { ...bookToSave }
+      });
 
       // if book successfully saves to user's account, save book id to state
       setSavedBookIds([...savedBookIds, bookToSave.bookId]);
