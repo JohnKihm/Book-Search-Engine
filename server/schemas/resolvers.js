@@ -26,8 +26,13 @@ const resolvers = {
             );
             return updatedUser;
         },
-        removeBook: async (parent, args) => {
-            return;
+        removeBook: async (parent, { user, params }) => {
+            const updatedUser = await User.findOneAndUpdate(
+                { _id: user._id },
+                { $pull: { savedBooks: { bookId: params.bookId } } },
+                { new: true }
+            );
+            return updatedUser;
         },
     },
 }
