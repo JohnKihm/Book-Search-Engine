@@ -1,32 +1,33 @@
 const typeDefs = /* GraphQL */`
   type User {
-    _id: ID!
+    _id: ID
     username: String!
     email: String!
+    password: String!
     bookCount: Int
     savedBooks: [Book]
   }
 
   type Book {
-    bookId: String
+    bookId: String!
     authors: [String]
-    description: String
+    description: String!
     title: String!
     image: String
     link: String
   }
 
   input BookInput {
-    bookId: String
+    bookId: String!
     authors: [String]
-    description: String
+    description: String!
     title: String!
     image: String
     link: String
   }
 
   type Auth {
-    token: String!
+    token: ID!
     user: User
   }
 
