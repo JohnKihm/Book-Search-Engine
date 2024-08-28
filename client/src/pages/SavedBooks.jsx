@@ -9,11 +9,17 @@ import {
 import Auth from '../utils/auth';
 import { removeBookId } from '../utils/localStorage';
 import { GET_ME } from '../utils/queries';
+import { REMOVE_BOOK } from '../utils/mutations';
 
-const { loading, data } = useQuery(GET_ME);
-const [deleteBook, { error }] = useMutation(REMOVE_BOOK);
+
 
 const SavedBooks = () => {
+  const { loading, data } = useQuery(GET_ME);
+  // eslint-disable-next-line no-unused-vars
+  const [deleteBook, { error }] = useMutation(REMOVE_BOOK);
+  console.log('=========');
+  console.log(data);
+  console.log('=========');
   const userData = data;
 
   // create function that accepts the book's mongo _id value as param and deletes the book from the database
@@ -25,7 +31,8 @@ const SavedBooks = () => {
     }
 
     try {
-      const { data } = await deleteBook({
+      // eslint-disable-next-line no-unused-vars
+      const { res } = await deleteBook({
         variables: { bookId }
       });
       // upon success, remove book's id from localStorage
@@ -56,8 +63,8 @@ const SavedBooks = () => {
         <Row>
           {userData.savedBooks.map((book) => {
             return (
-              <Col md="4">
-                <Card key={book.bookId} border='dark'>
+              <Col key={book.bookId} md="4">
+                <Card border='dark'>
                   {book.image ? <Card.Img src={book.image} alt={`The cover for ${book.title}`} variant='top' /> : null}
                   <Card.Body>
                     <Card.Title>{book.title}</Card.Title>

@@ -8,12 +8,10 @@ import {
   Card,
   Row
 } from 'react-bootstrap';
-
 import Auth from '../utils/auth';
 import { searchGoogleBooks } from '../utils/API';
 import { saveBookIds, getSavedBookIds } from '../utils/localStorage';
 import { SAVE_BOOK } from '../utils/mutations';
-const [saveBook, { error }] = useMutation(SAVE_BOOK);
 
 const SearchBooks = () => {
   // create state for holding returned google api data
@@ -23,6 +21,9 @@ const SearchBooks = () => {
 
   // create state to hold saved bookId values
   const [savedBookIds, setSavedBookIds] = useState(getSavedBookIds());
+
+  // eslint-disable-next-line no-unused-vars
+  const [saveBook, { error }] = useMutation(SAVE_BOOK);
 
   // set up useEffect hook to save `savedBookIds` list to localStorage on component unmount
   // learn more here: https://reactjs.org/docs/hooks-effect.html#effects-with-cleanup
@@ -75,7 +76,7 @@ const SearchBooks = () => {
     }
 
     try {
-      await saveBook({
+      const { data } = await saveBook({
         variables: { ...bookToSave }
       });
 
