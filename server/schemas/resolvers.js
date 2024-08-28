@@ -3,22 +3,24 @@ const { signToken } = require('../utils/auth');
 
 const resolvers = {
     Query: {
-        me: async (parent, { user = null, params }) => {
-            return User.findOne({
-                $or: [{ _id: user ? user._id : params.id }, { username: params.username }],
-            });
+        me: async (parent, args, context) => {
+            if (context.user) {
+                return User.findOne({ _id: context.user._id });
+            }
+            throw AuthenticationError;
         },
     },
     Mutation: {
-        login: async (parent, { body }) => {
-            const user = await User.findOne({ $or: [{ username: body.username }, { email: body.email }] });
+        login: async (parent, { email, password }) => {
+            const user = await User.findOne({ email });
             if (!user) {
-                return { message: "Can't find this user" };
+                throw AuthenticationError;
             }
-            const correctPw = await user.isCorrectPassword(body.password)
+            const correctPw = await user.isCorrectPassword(password);
             if (!correctPw) {
-                return { message: 'Wrong password!' };
+                throw AuthenticationError;
             }
+
             const token = signToken(user);
             return { token, user };
         },
@@ -27,21 +29,31 @@ const resolvers = {
             const token = signToken(user);
             return { token, user };
         },
-        saveBook: async (parent, { user, body }) => {
-            const updatedUser = await User.findOneAndUpdate(
-                { _id: user._id },
-                { $addToSet: { savedBooks: body } },
-                { new: true, runValidators: true },
-            );
-            return updatedUser;
+        saveBook: async (parent, args, context) => {
+            // If context has a `user` property, that means the user executing this mutation has a valid JWT and is logged in
+            if (context.user) {
+                const updatedUser = await User.findOneAndUpdate(
+                    { _id: context.user._id },
+                    { $addToSet: { savedBooks: args } },
+                    { new: true, runValidators: true },
+                );
+                return updatedUser;
+            }
+            // If user attempts to execute this mutation and isn't logged in, throw an error
+            throw AuthenticationError;
         },
-        removeBook: async (parent, { user, params }) => {
-            const updatedUser = await User.findOneAndUpdate(
-                { _id: user._id },
-                { $pull: { savedBooks: { bookId: params.bookId } } },
-                { new: true }
-            );
-            return updatedUser;
+        removeBook: async (parent, { bookId }, context) => {
+            // If context has a `user` property, that means the user executing this mutation has a valid JWT and is logged in
+            if (context.user) {
+                const updatedUser = await User.findOneAndUpdate(
+                    { _id: context.user._id },
+                    { $pull: { savedBooks: { bookId: bookId } } },
+                    { new: true }
+                );
+                return updatedUser; 
+            }
+            // If user attempts to execute this mutation and isn't logged in, throw an error
+            throw AuthenticationError;
         },
     },
 }
